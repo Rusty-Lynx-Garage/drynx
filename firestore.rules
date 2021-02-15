@@ -4,5 +4,18 @@ service cloud.firestore {
         allow read: if true;
         allow write: if true;
     }
+    match /users/{user} {
+        allow read: if true;
+        allow write: if true;
+    }
+    match /uptakes/{uptake} {
+        allow read: if true;
+        allow write: if true;
+    }
+
+    match /transfers/{transfer} {
+        allow read: if true;
+        allow write: if true;
+    }
   }
 }
