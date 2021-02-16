@@ -447,6 +447,8 @@ function transfersIndex(){
 							.appendTo("#pendingTransfers .list");
 					});
 					printAvatarsAndNames();
+				}else{
+					$("#pendingTransfers").append($("<p>").text("Genial! No hay nada pendiente"));
 				}
 	    	})
 	    .catch(function(error) {
@@ -605,7 +607,6 @@ function printBeverageForm(doc){
 					price: f[0].dprice,
 					image: f[0].dimage
 				}).then(function(docRef) {
-					console.log("Beverage written with ID:" + f[0].ddoc);
 					manageBeverages();
 				}).catch(function(error) {
 					console.error("Error adding document: ", error);
@@ -616,7 +617,6 @@ function printBeverageForm(doc){
 					price: f[0].dprice,
 					image: f[0].dimage
 				}).then(function(docRef) {
-					console.log("Beverage written with ID: ", docRef.id);
 					manageBeverages();
 				}).catch(function(error) {
 					console.error("Error adding document: ", error);
@@ -712,17 +712,16 @@ function printUserForm(doc){
 					email: f[0].uemail,
 					admin: (f[0].uadmin == "on")
 				}).then(function(docRef) {
-					console.log("Beverage written with ID:" + f[0].udoc);
 					manageUsers();
 				}).catch(function(error) {
 					console.error("Error adding document: ", error);
 				});
 			}else{
-				db.collection("users").add({
+				var [userid,domain] = f[0].uemail.split("@");
+				db.collection("users").doc(userid).set({
 					email: f[0].uemail,
 					admin: (f[0].uadmin == "on")
 				}).then(function(docRef) {
-					console.log("Beverage written with ID: ", docRef.id);
 					manageUsers();
 				}).catch(function(error) {
 					console.error("Error adding document: ", error);
