@@ -5,22 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Drynx - Rusty Lynx Garage</title>
 
+  <link rel="icon" type="image/png" href="images/drynx-icon-16.png" sizes="16x16">
+  <link rel="icon" type="image/png" href="images/drynx-icon-32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="images/drynx-icon-64.png" sizes="64x64">
+
   <!-- update the version number as needed -->
   <script defer src="/__/firebase/8.2.1/firebase-app.js"></script>
-  <!-- include only the Firebase features as you need -->
   <script defer src="/__/firebase/8.2.1/firebase-auth.js"></script>
-  <!--<script defer src="/__/firebase/8.2.1/firebase-database.js"></script>-->
   <script defer src="/__/firebase/8.2.1/firebase-firestore.js"></script>
-    <!--<script defer src="/__/firebase/8.2.1/firebase-functions.js"></script>
-    <script defer src="/__/firebase/8.2.1/firebase-messaging.js"></script>-->
+    <!--<script defer src="/__/firebase/8.2.1/firebase-functions.js"></script>-->
+    <script defer src="/__/firebase/8.2.1/firebase-messaging.js"></script>
     <script defer src="/__/firebase/8.2.1/firebase-storage.js"></script>
     <script defer src="/__/firebase/8.2.1/firebase-analytics.js"></script>
     <!--<script defer src="/__/firebase/8.2.1/firebase-remote-config.js"></script>
       <script defer src="/__/firebase/8.2.1/firebase-performance.js"></script>-->
-    <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
     <script defer src="/__/firebase/init.js?useEmulator=true"></script>
 
     <link rel="stylesheet" type="text/css" href="/semantic/dist/semantic.min.css">
@@ -54,6 +52,11 @@
         <div class="menu">
           <div class="item" onclick="logout();">Cerrar sesión</div>
         </div>
+      </div>
+      <div class="right menu">
+        <a class="item" onclick="manageAlerts();">
+          <i class="bell slash icon"></i>
+        </a>
       </div>
     </div>
 
@@ -89,7 +92,7 @@
       <a id="amtransfers" class="item" onclick="transfersIndex();">Confirmar transferencias</a>
       <a id="ambeves" class="item" onclick="manageBeverages();">Gestionar bebidas</a>
       <a id="amusers" class="item" onclick="manageUsers();">Gestionar usuarios</a>
-      <a id="amunpaid" class="item">Notificar morosos</a>
+      <!--<a id="amunpaid" class="item">Notificar morosos</a>-->
     </div>
 
     <div class="ui modal">
@@ -109,7 +112,7 @@
         </div>
       </div>
       <div class="actions">
-        <div class="ui positive button" onclick="return false;">Guardar</div>
+        <div class="ui positive button">Guardar</div>
       </div>
     </div>
   </body>

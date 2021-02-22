@@ -1,8 +1,8 @@
 var a = false;
+var n = false;
 var people = [];
 
 firebase.auth().onAuthStateChanged(function(user) {
-	console.log("cambio de estado de sesión");
 	if (user) {
 		checkUser();
  	} else {
@@ -11,7 +11,6 @@ firebase.auth().onAuthStateChanged(function(user) {
 });
  
 $(document).ready(function(){
-	console.log("document ready vemos sesión");
 	$("#loader").fadeOut();
 	var user = firebase.auth().currentUser;
 	if (user) {
@@ -19,6 +18,16 @@ $(document).ready(function(){
 	}else{
 		showLogin();
 	}
+
+	const messaging = firebase.messaging();
+	messaging.getToken({vapidKey: "BD87ZybGpbvjwqT1JAeLjXEET3uHE8SIigVNHohqLYJfAE3B3Eel96bXPAVKP4BDifWVumCacmIj8zhmbtKxYTg"}).then((currentToken) => {
+		if (currentToken) {
+			n = currentToken;
+			$(".bell").removeClass("slash").addClass("outline");
+		}
+	}).catch((err) => {
+		console.log('An error occurred while retrieving token. ', err);
+	});
 
 	var db = firebase.firestore();
 	var storage = firebase.storage().ref();
@@ -38,14 +47,13 @@ $(document).ready(function(){
   				console.log("error al descargar imagen de usuario");
 			});
 		});
-		console.log(people);
-	})
-	.catch(function(error) {
+	}).catch(function(error) {
     	console.log("Error getting users: ", error);
 	});
 });
 
 function signin(){
+	console.log("SESSION: sign in");
 	var provider = new firebase.auth.GoogleAuthProvider();
 	firebase.auth().useDeviceLanguage();
 	firebase.auth()
@@ -54,7 +62,7 @@ function signin(){
 			var credential = result.credential;
 			var token = credential.accessToken;
 			var user = result.user;
-
+			firebase.analytics().logEvent("sign_up");
 		}).catch((error) => {
 			var errorCode = error.code;
 			var errorMessage = error.message;
@@ -79,6 +87,7 @@ function showLogin(){
 function checkUser(){
 	var user = firebase.auth().currentUser;
 	var [userid,domain] = user.email.split("@");
+	firebase.analytics().setUserId(userid);
 	var db = firebase.firestore();
 	var ue = false;
 	db.collection("users").doc(userid)
@@ -93,12 +102,11 @@ function checkUser(){
     	})
     .catch(function(error) {
         console.log("Error getting user: ", error);
-		showSessionError("No puedes iniciar sesión");        
+		showSessionError("No puedes iniciar sesión");
     });
 }
 
 function identifyUser(user,userid){
-
 	fetch(user.photoURL)
 	  .then(res => res.blob())
 	  .then(blob => {
@@ -137,4 +145,24 @@ function showSessionError(message){
   	});
     $("#sessionError").fadeIn();
     logout();
+}
+
+
+function manageAlerts(){
+	/*
+	const messaging = firebase.messaging();
+	if (n) {
+		messaging.deleteToken().then(() => {
+			$(".bell").removeClass("outline").addClass("slash");
+			firebase.analytics().logEvent("disable_alerts");
+		});
+	}else{
+		Notification.requestPermission().then(function(permission) {
+			$(".bell").removeClass("slash").addClass("outline");
+			firebase.analytics().logEvent("enable_alerts");
+		}).catch(() => {
+			console.log('Permission denied. ');
+		});
+	}
+	*/
 }

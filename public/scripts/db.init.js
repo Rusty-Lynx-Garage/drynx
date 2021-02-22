@@ -10,13 +10,14 @@ var y,m,ty,tm;
 
 function drinxIndex(){
 
+	firebase.analytics().setCurrentScreen("Index");
 	$(".menu .item").removeClass("active");
 	$("#tmdrynx").addClass("active");
 
 	var db = firebase.firestore();
 	$("#main").empty()
 		.append($("<h2>").text("Bebidas").addClass("ui center aligned header"))
-		.append($("<div>").addClass("ui four column doubling cards stackable grid container"));
+		.append($("<div>").addClass("ui two column cards grid container"));
 
 	db.collection("beverages").get().then(function(querySnapshot) {
 		querySnapshot.forEach(function(doc) {
@@ -43,6 +44,12 @@ function drinxIndex(){
 							})
 							.then(function(docRef) {
 								console.log("Uptake written with ID: ", docRef.id);
+								var intQuantity = isNaN($("#quantity").val())? 1: parseInt($("#quantity").val());
+
+								firebase.analytics().logEvent("purchase",{
+									currency: "euro",
+									value: parseFloat($('.ui.modal').attr("data-price"))
+								});
 							})
 							.catch(function(error) {
 								console.error("Error adding document: ", error);
@@ -66,6 +73,8 @@ function drinxIndex(){
 }
 
 function uptakesIndex(){
+
+	firebase.analytics().setCurrentScreen("Uptakes");
 	$(".menu .item").removeClass("active");
 	$("#tmuptakes").addClass("active");
 
@@ -91,6 +100,8 @@ function uptakesIndex(){
 }
 
 function globalsIndex(){
+
+	firebase.analytics().setCurrentScreen("Globals");
 	$(".menu .item").removeClass("active");
 	$("#tmglobals").addClass("active");
 
@@ -358,6 +369,10 @@ function printDebtButton(debt){
 							$(".debt").remove();
 							printPendingTransfers();
 						});
+						firebase.analytics().logEvent("refund",{
+							currency: "euro",
+							value: $(this).attr("data-debt")
+						});
 				    })
 				    .catch(function(error) {
 						$(".debt").fadeOut(function(){
@@ -394,6 +409,7 @@ function printAvatarsAndNames(){
 //a
 
 function printAccessControl(){
+	firebase.analytics().setCurrentScreen("AccessControl");
 	$("<div>").addClass("ui container")
 		.append($("<div>").addClass("ui negative message")
 			.append($("<p>").text("No tienes acceso a esta sección")));
@@ -405,6 +421,7 @@ function transfersIndex(){
 	$("#amtransfers").addClass("active");
 
 	if(a){
+		firebase.analytics().setCurrentScreen("Transfers");
 		$("#main").empty()
 			.append($("<h2>").text("Transferencias").addClass("ui center aligned header"))
 			.append($("<h3>").text("Por confirmar").addClass("ui center aligned header"))
@@ -503,6 +520,7 @@ function manageBeverages(){
 	$("#ambeves").addClass("active");
 
 	if(a){
+		firebase.analytics().setCurrentScreen("Beverages");
 		var db = firebase.firestore();
 		$("#main").empty()
 			.append($("<h2>").text("Gestionar bebidas").addClass("ui center aligned header"))
@@ -534,6 +552,7 @@ function manageBeverages(){
 }
 
 function editBeverage(b){
+
 	if(a){
 		if(b){
 			var db = firebase.firestore();
@@ -549,6 +568,8 @@ function editBeverage(b){
 }
 
 function printBeverageForm(doc){
+
+	firebase.analytics().setCurrentScreen("BeverageForm");
 	$("#main").empty()
 		.append($("<div>").addClass("ui segment container")
 			.append($("<form>").addClass("ui form")
@@ -632,6 +653,7 @@ function manageUsers(){
 	$("#amusers").addClass("active");
 
 	if(a){
+		firebase.analytics().setCurrentScreen("Users");
 		var db = firebase.firestore();
 		$("#main").empty()
 			.append($("<h2>").text("Gestionar usuarios").addClass("ui center aligned header"))
@@ -679,6 +701,7 @@ function editUser(u){
 }
 
 function printUserForm(doc){
+	firebase.analytics().setCurrentScreen("UserForm");
 	$("#main").empty()
 		.append($("<div>").addClass("ui segment container")
 			.append($("<form>").addClass("ui form")
