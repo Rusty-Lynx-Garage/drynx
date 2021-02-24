@@ -57,14 +57,14 @@ function drinxIndex(){
 						},
 						onHidden: function(){
 							$("#quantity").val("1");
-							$("body.dimmable").removeEventListener("touchmove",preventScroll);
+							$("body").removeClass("dimmable");
 						}
 					}).modal('show');
 				})
 					.append($("<div>").addClass("image")
 						.append($("<img>").attr("src", images_url + images_d[doc.data().image].file)))
 					.append($("<div>").addClass("content")
-						.append($("<a>").addClass("ui labeled floated header").attr("href","#").text(doc.data().name))
+						.append($("<a>").addClass("ui header").attr("href","#").text(doc.data().name))
 						.append($("<div>").addClass("ui right floated tag label").text(formatCurrency(doc.data().price)))))
 				.appendTo(".container");
 		});
