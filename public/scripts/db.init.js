@@ -57,6 +57,7 @@ function drinxIndex(){
 						},
 						onHidden: function(){
 							$("#quantity").val("1");
+							$("body.dimmable").removeEventListener("touchmove",preventScroll);
 						}
 					}).modal('show');
 				})
