@@ -4,9 +4,43 @@ firebase.analytics();
 const months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const images_url = "/images/";
 const user_default = "user.png";
-const images_d = [{name:"Por defecto",	file:"default.jpg"},{name:"Refresco", file:"refresco.jpg"},{name:"Cerveza",	file:"cerveza.jpg"},{name:"Café", file:"cafe.jpg"},{name:"Gintonic",	file:"cubata.jpg"}];
+const images_d = [
+	{name:"Por defecto", file:"default.jpg"},
+	{name:"Coca-cola", file:"coca-cola.png"},
+	{name:"Coca-cola light", file:"coca-cola-light.jpg"},
+	{name:"Coca-cola zero", file:"coca-cola-zero.png"},
+	{name:"Coca-cola zero zero", file:"coca-cola-zero-zero.png"},
+	{name:"Fanta limón", file:"fanta-limon.jpg"},
+	{name:"Fanta naranja", file:"fanta-naranja.jpg"},
+	{name:"Tónica", file:"tonica.png"},
+	{name:"7up", file:"7up.png"},
+	{name:"Lata cerveza", file:"mahou.png"},
+	{name:"Tercio cerveza", file:"estrella-galicia.png"},
+	{name:"Café", file:"cafe.jpg"},
+	{name:"Café con leche", file:"cafe-leche.jpg"},
+	{name:"Dyc", file:"dyc.jpg"},
+	{name:"Red label", file:"johnnie-walker.png"},
+	{name:"Ron", file:"barcelo.png"},
+	{name:"Vodka", file:"moskovskaya.png"},
+	{name:"Hierbas", file:"orujo-hierbas.png"},
+	{name:"Crema", file:"crema-orujo.jpg"},
+	{name:"Ginebra",file:"tanqueray.png"}
+	];
+const categories = ["Cafés","Cervezas","Refrescos","Licores"];
+const cat_refrescos = 2;
 var products = [];
 var y,m,ty,tm;
+
+/* TODO LIST
+
+- Agregar categoría, combinable, adicionable y stock a la bebida en formulario de gestión
+- Agregar agrupación por categoría al listado general
+- Descontar stock en consumo
+- Agregar refresco al consumo de combinados
+- Agregar consumo del usuario y deudas a su ficha
+- Agregar gestión de stock en edición bebidas
+
+*/
 
 function drinxIndex(){
 
@@ -279,6 +313,7 @@ function printMonthUptakes(){
 		.where("user","==",userDoc)
 		.where("date",">",firebase.firestore.Timestamp.fromDate(new Date(y, m, "1")))
 		.where("date","<",firebase.firestore.Timestamp.fromDate(new Date(y, m+1, "0")))
+		.orderBy("date","desc")
 		.get().then(function(querySnapshot) {
 			var debt = 0;
 			if(querySnapshot.docs.length == 0){
@@ -403,7 +438,7 @@ function printConfirmedTransfers(){
 function printAvatarsAndNames(){
 	for(var p in people) {
   		$("img." + p).attr("src",people[p].avatar);
-		$(".header." + p).text(people[p].name);
+		$(".header." + p).text(people[p].name?people[p].name:p);
 	}
 }
 
@@ -530,8 +565,7 @@ function manageBeverages(){
 				.append($("<div>").addClass("ui center aligned container")
 					.append($("<button>").addClass("ui labeled icon button").text("Añadir bebida").click(function(){
 						editBeverage();
-					})
-						.append($("<i>").addClass("plus icon")))));
+					}).append($("<i>").addClass("plus icon")))));
 
 		db.collection("beverages").get().then(function(querySnapshot) {
 			querySnapshot.forEach(function(doc) {
@@ -585,6 +619,15 @@ function printBeverageForm(doc){
 						.append($("<input>").attr("type","text").attr("name","dprice").attr("placeholder","Precio").val(doc?doc.data().price:""))
 						.append($("<div>").addClass("ui label").text("€"))))
 				.append($("<div>").addClass("field")
+					.append($("<label>").text("Stock"))
+					.append($("<div>").addClass("ui right labeled input")
+						.append($("<input>").attr("type","text").attr("name","dstock").attr("placeholder","Stock").val(doc?doc.data().stock:""))
+						.append($("<div>").addClass("ui label").text("uds."))))
+				.append($("<div>").addClass("field")
+					.append($("<label>").text("Categoría"))
+					.append($("<select>").addClass("ui dropdown").attr("id","dcategory").attr("name","dcategory")
+						.append($("<option>").val("").text("Selecciona categoría"))))						
+				.append($("<div>").addClass("field")
 					.append($("<label>").text("Imagen"))
 					.append($("<label>").attr("id","selectedImage").text(""))
 					.append($("<div>").addClass("ui dropdown selection")
@@ -593,8 +636,17 @@ function printBeverageForm(doc){
 							.prepend($("<img>").addClass("ui avatar image")))
 						.append($("<i>").addClass("dropdown icon"))
 						.append($("<div>").addClass("menu"))))
+				.append($("<div>").addClass("inline field")
+					.append($("<div>").addClass("ui toggle checkbox")
+						.append($("<input>").attr("type","checkbox").attr("name","dmixable").addClass("hidden"))
+						.append($("<label>").text("Esta bebida se puede combinar con refrescos"))))
 				.append($("<div>").addClass("ui center aligned container")
-					.append($("<button>").addClass("ui button").text("Guardar")))));
+					.append($("<button>").addClass("ui labeled icon button").text("Volver").click(function(){
+						console.log("vuelvo");
+						manageBeverages();
+						return false;
+					}).append($("<i>").addClass("undo icon")))
+					.append($("<button>").addClass("ui labeled icon button").text("Guardar").append($("<i>").addClass("save icon"))))));
 
 	$('.dropdown.selection').dropdown({action: 'combo'});
 
@@ -604,9 +656,16 @@ function printBeverageForm(doc){
 			.appendTo($("#main .menu"));
 	}
 
+	for(var c in categories){
+		var selected = doc.data().category == c?"selected":"data-notselected";
+		$("<option>").val(c).text(categories[c]).attr(selected,selected).appendTo($("#dcategory"));
+	}
+
 	$('.ui.form').form({
     	fields: {
      		dname: {identifier:'dname', rules:[{type:'empty',prompt:'Introduce un nombre'}]},
+     		dstock: {identifier:'dstock', rules:[{type:'empty',prompt:'Introduce el stock disponible'},{type:'integer',prompt:'El stock no es un número entero válido'}]},
+     		dcategory: {identifier:'dcategory', rules:[{type:'empty',prompt:'Elige la categoría'}]},
      		dprice: {identifier:'dprice', rules:[{type:'empty',prompt:'Introduce el precio'},{type:'number',prompt:'El precio debe ser un número'}]},
      		dimage: {identifier:'dimage', rules:[{type:'empty',prompt:'Elige una imagen'}]}
     	}
@@ -623,22 +682,21 @@ function printBeverageForm(doc){
 		if( !$("div.field").hasClass("error")) {
 			var f = $('.ui.form').form('get values');
 			var db = firebase.firestore();
-			if(f[0].ddoc){
-				db.collection("beverages").doc(f[0].ddoc).update({
+			var data = {
 					name: f[0].dname,
 					price: f[0].dprice,
+					stock: f[0].dstock,
+					category: f[0].dcategory,
 					image: f[0].dimage
-				}).then(function(docRef) {
+				};
+			if(f[0].ddoc){
+				db.collection("beverages").doc(f[0].ddoc).update(data).then(function(docRef) {
 					manageBeverages();
 				}).catch(function(error) {
 					console.error("Error adding document: ", error);
 				});
 			}else{
-				db.collection("beverages").add({
-					name: f[0].dname,
-					price: f[0].dprice,
-					image: f[0].dimage
-				}).then(function(docRef) {
+				db.collection("beverages").add(data).then(function(docRef) {
 					manageBeverages();
 				}).catch(function(error) {
 					console.error("Error adding document: ", error);

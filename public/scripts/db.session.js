@@ -33,13 +33,14 @@ $(document).ready(function(){
 	var storage = firebase.storage().ref();
 	db.collection("users").get().then(function(querySnapshot) {
 		querySnapshot.forEach(function(u) {
+			people[u.id] = {avatar: "/images/user.png", name: u.data().name?u.data().name:u.id};
 			storage.child('avatars/' + u.id + '.jpg').getDownloadURL().then((url) => {
 				var xhr = new XMLHttpRequest();
 				xhr.responseType = 'blob';
 				xhr.onload = (event) => {
 					var blob = xhr.response;
 					var bUrl = URL.createObjectURL(blob);
-					people[u.id] = {avatar: bUrl, name: u.data().name};
+					people[u.id].avatar = bUrl;
 				};
 				xhr.open('GET', url);
 				xhr.send();
@@ -102,7 +103,7 @@ function checkUser(){
     	})
     .catch(function(error) {
         console.log("Error getting user: ", error);
-		showSessionError("No puedes iniciar sesión");
+		showSessionError("No puedes iniciar sesión con " + user.email);
     });
 }
 

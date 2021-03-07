@@ -371,6 +371,7 @@ $.fn.modal = function(parameters) {
                     duration    : settings.duration,
                     useFailSafe : true,
                     onComplete : function() {
+		      module.unbind.scrollLock();
                       settings.onVisible.apply(element);
                       if(settings.keyboardShortcuts) {
                         module.add.keyboardShortcuts();

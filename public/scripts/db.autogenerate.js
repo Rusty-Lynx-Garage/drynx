@@ -280,6 +280,22 @@
       console.error("Error adding document: ", error);
     });
 
+   db.collection("uptakes").add({
+      beverage: db.doc('beverages/9854714GvVSCWaoCKI4l'),
+      user: db.doc('users/sergrafer'),
+      quantity: 150,
+      price: 300,
+      description: "Combinado",
+      paid: false,
+      date: firebase.firestore.Timestamp.fromDate(new Date("February 11, 2021"))
+    })
+    .then(function(docRef) {
+      console.log("Uptake written with ID: ", docRef.id);
+    })
+    .catch(function(error) {
+      console.error("Error adding document: ", error);
+    });
+
     db.collection("uptakes").add({
       beverage: db.doc('beverages/9854714GvVSCWaoCKI4l'),
       user: db.doc('users/dgrafols'),
