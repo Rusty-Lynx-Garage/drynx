@@ -108,6 +108,7 @@ function checkUser(){
 }
 
 function identifyUser(user,userid){
+	console.log(user.photoURL);
 	fetch(user.photoURL)
 	  .then(res => res.blob())
 	  .then(blob => {
@@ -116,7 +117,8 @@ function identifyUser(user,userid){
 		$("#identity label").text(user.displayName);
 		$("#sessionlayout").fadeIn();
 		$("#loginlayout").fadeOut(function(){
-			$("#topmenu").fadeIn();drinxIndex();
+			$("#topmenu").fadeIn();
+			drinxIndex();
 			if(a) $("#amenu").fadeIn();
 		});
 

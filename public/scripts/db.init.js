@@ -33,8 +33,6 @@ var y,m,ty,tm;
 
 /* TODO LIST
 
-- Agregar categoría, combinable, adicionable y stock a la bebida en formulario de gestión
-- Agregar agrupación por categoría al listado general
 - Descontar stock en consumo
 - Agregar refresco al consumo de combinados
 - Agregar consumo del usuario y deudas a su ficha
@@ -49,14 +47,18 @@ function drinxIndex(){
 	$("#tmdrynx").addClass("active");
 
 	var db = firebase.firestore();
-	$("#main").empty()
-		.append($("<h2>").text("Bebidas").addClass("ui center aligned header"))
-		.append($("<div>").addClass("ui two column cards grid container"));
+	$("#main").empty();
 
-	db.collection("beverages").get().then(function(querySnapshot) {
+	db.collection("beverages").orderBy("category","asc").get().then(function(querySnapshot) {
+		var oldCat = -1;
 		querySnapshot.forEach(function(doc) {
-
 			products[doc.id] = {image: images_url + images_d[doc.data().image].file, name: doc.data().name};
+
+			if(oldCat != doc.data().category){
+				$("#main").append($("<h2>").text(categories[doc.data().category]).addClass("ui center aligned header"))
+					.append($("<div>").addClass("ui two column cards grid container cat" + doc.data().category));
+				oldCat = doc.data().category;
+			}
 
 			$("<div>").addClass("column")
 				.append($("<div>").addClass("ui card").attr("data-id",doc.id).attr("data-price",doc.data().price).click(function(){
@@ -100,7 +102,7 @@ function drinxIndex(){
 					.append($("<div>").addClass("content")
 						.append($("<a>").addClass("ui header").attr("href","#").text(doc.data().name))
 						.append($("<div>").addClass("ui right floated tag label").text(formatCurrency(doc.data().price)))))
-				.appendTo(".container");
+				.appendTo(".cat" + doc.data().category);
 		});
 	});
 
@@ -657,10 +659,15 @@ function printBeverageForm(doc){
 	}
 
 	for(var c in categories){
-		var selected = doc.data().category == c?"selected":"data-notselected";
+		if(doc)
+			var selected = doc.data().category == c?"selected":"data-notselected";
+		else
+			var selected = "data-notselected";
 		$("<option>").val(c).text(categories[c]).attr(selected,selected).appendTo($("#dcategory"));
 	}
 
+	if(doc) if(doc.data().mixable) $('.ui.checkbox input').attr("checked","checked");
+	$('.ui.checkbox').checkbox();
 	$('.ui.form').form({
     	fields: {
      		dname: {identifier:'dname', rules:[{type:'empty',prompt:'Introduce un nombre'}]},
@@ -687,7 +694,8 @@ function printBeverageForm(doc){
 					price: f[0].dprice,
 					stock: f[0].dstock,
 					category: f[0].dcategory,
-					image: f[0].dimage
+					image: f[0].dimage,
+					mixable: (f[0].dmixable == "on")
 				};
 			if(f[0].ddoc){
 				db.collection("beverages").doc(f[0].ddoc).update(data).then(function(docRef) {
