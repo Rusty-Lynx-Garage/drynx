@@ -205,10 +205,11 @@ function globalsIndex(){
 	        	});
 
 	        	for(var d in drinkers) {
+	        		var id = d.replace(/\./g, "");
 					$("<div>").addClass("item")
-						.append($("<img>").addClass("ui avatar image " + d).attr("src",images_url + user_default))
+						.append($("<img>").addClass("ui avatar image " + id).attr("src",images_url + user_default))
 						.append($("<div>").addClass("content")
-							.append($("<div>").addClass("header " + d))
+							.append($("<div>").addClass("header " + id))
 							.append($("<p>").text(drinkers[d].uptakes + (drinkers[d].uptakes > 1 ? " consumiciones" : " consumición"))))
 						.prepend($("<div>").addClass("right floated content").text(formatCurrency(drinkers[d].debt)))
 						.appendTo("#currentDrinkers .list");
@@ -252,10 +253,11 @@ function globalsIndex(){
 
 	        	for(var d in defaulters) {
 	        		for(var i in defaulters[d]) {
+	        			var id = d.replace(/\./g, "");
 						$("<div>").addClass("item")
-							.append($("<img>").addClass("ui avatar image " + d).attr("src",images_url + user_default))
+							.append($("<img>").addClass("ui avatar image " + id).attr("src",images_url + user_default))
 							.append($("<div>").addClass("content")
-								.append($("<div>").addClass("header " + d))
+								.append($("<div>").addClass("header " + id))
 								.append($("<p>").text(months[defaulters[d][i].date.getMonth()] + " " + defaulters[d][i].date.getFullYear())))
 							.prepend($("<div>").addClass("right floated content").text(formatCurrency(defaulters[d][i].debt)))
 							.appendTo("#currentDefaulters .list");
@@ -325,10 +327,14 @@ function printCalendar(callback){
 		.appendTo($(".container.calendar"));
 }
 
-function printMonthUptakes(){
+function printMonthUptakes(drinker){
 	var db = firebase.firestore();
-	var user = firebase.auth().currentUser;
-	var [userid,domain] = user.email.split("@");
+	if(drinker)
+		userid = drinker;
+	else{
+		var user = firebase.auth().currentUser;
+		var [userid,domain] = user.email.split("@");
+	}
 	const userDoc = firebase.firestore().collection('users').doc(userid);
 	$("#myUptakes").empty();
 	db.collection("uptakes")
@@ -339,7 +345,7 @@ function printMonthUptakes(){
 		.get().then(function(querySnapshot) {
 			var debt = 0;
 			if(querySnapshot.docs.length == 0){
-			   	$("<p>").text("No has consumido en " + months[m]).attr("colspan","3").appendTo($("#myUptakes"));
+			   	$("<p>").text("No hay consumos en " + months[m]).attr("colspan","3").appendTo($("#myUptakes"));
 			}else{
 	        	querySnapshot.forEach(function(uptake) {
 	        		var b = uptake.data().beverage.id;
@@ -347,7 +353,7 @@ function printMonthUptakes(){
 					$("<div>").addClass("item")
 						.append($("<img>").addClass("ui avatar image").attr("src",products[b].image))
 						.append($("<div>").addClass("content")
-							.append($("<div>").addClass("header").text(uptake.data().quantity + " " + uptake.data().description + (uptake.data().quantity > 1? "s" : "")))
+							.append($("<div>").addClass("header").text(uptake.data().quantity + " " + uptake.data().description))
 							.append($("<p>").text(new Intl.DateTimeFormat("es-ES", options).format(uptake.data().date.toDate()))))
 						.prepend($("<div>").addClass("right floated content").text(formatCurrency(uptake.data().quantity * uptake.data().price)))
 						.appendTo("#myUptakes");
@@ -355,12 +361,15 @@ function printMonthUptakes(){
 	            		debt += uptake.data().quantity * uptake.data().price;
 	        	});
 	        }
-	        $("#debt .value").text(formatCurrency(debt));
-	        if((ty == y) && (tm == m))
-	        	$(".statistic .label").text("Llevas consumido");
-	        else
-	        	$(".statistic .label").text("Consumiste");
-	        checkTransfers(debt);
+
+	        if(!drinker){
+		        $("#debt .value").text(formatCurrency(debt));
+		        if((ty == y) && (tm == m))
+		        	$(".statistic .label").text("Llevas consumido");
+		        else
+		        	$(".statistic .label").text("Consumiste");
+		        checkTransfers(debt);
+	    	}
     	})
     .catch(function(error) {
         console.log("Error getting documents: ", error);
@@ -459,8 +468,9 @@ function printConfirmedTransfers(){
 
 function printAvatarsAndNames(){
 	for(var p in people) {
-  		$("img." + p).attr("src",people[p].avatar);
-		$(".header." + p).text(people[p].name?people[p].name:p);
+		 var id = p.replace(/\./g, "");
+  		$("img." + id).attr("src",people[p].avatar);
+		$(".header." + id).text(people[p].name?people[p].name:p);
 	}
 }
 
@@ -670,7 +680,6 @@ function printBeverageForm(doc){
 						.append($("<label>").text("Esta bebida se puede combinar con refrescos"))))
 				.append($("<div>").addClass("ui center aligned container")
 					.append($("<button>").addClass("ui labeled icon button").text("Volver").click(function(){
-						console.log("vuelvo");
 						manageBeverages();
 						return false;
 					}).append($("<i>").addClass("undo icon")))
@@ -760,9 +769,9 @@ function manageUsers(){
 
 		db.collection("users").get().then(function(querySnapshot) {
 			querySnapshot.forEach(function(doc) {
-
+				var id = doc.id.replace(/\./g, "");
 				$("<div>").addClass("item")
-					.append($("<img>").addClass("ui avatar image " + doc.id).attr("src",images_url + user_default))
+					.append($("<img>").addClass("ui avatar image " + id).attr("src",images_url + user_default))
 					.append($("<div>").addClass("content")
 						.append($("<div>").addClass("header").text(doc.data().name?doc.data().name:doc.data().email)))
 					.prepend($("<div>").addClass("right floated content")
@@ -796,6 +805,7 @@ function editUser(u){
 function printUserForm(doc){
 	firebase.analytics().setCurrentScreen("UserForm");
 	$("#main").empty()
+		.append($("<h3>").text(doc?doc.data().name:"Nuevo usuario").addClass("ui center aligned header"))
 		.append($("<div>").addClass("ui segment container")
 			.append($("<form>").addClass("ui form")
 				.append($("<div>").addClass("ui error message"))
@@ -808,7 +818,12 @@ function printUserForm(doc){
 						.append($("<input>").attr("type","checkbox").attr("name","uadmin").addClass("hidden"))
 						.append($("<label>").text("Administrador"))))
 				.append($("<div>").addClass("ui center aligned container")
-					.append($("<button>").addClass("ui button").text("Guardar")))));
+					.append($("<button>").addClass("ui labeled icon button").text("Volver").click(function(){
+						manageUsers();
+						return false;
+					}).append($("<i>").addClass("undo icon")))
+					.append($("<button>").addClass("ui labeled icon button").text("Guardar").append($("<i>").addClass("save icon"))))));
+
 
 	if(doc) if(doc.data().admin) $('.ui.checkbox input').attr("checked","checked");
 	$('.ui.checkbox').checkbox();
@@ -845,4 +860,19 @@ function printUserForm(doc){
 			}
 		}
 	});
+
+	$("#main").append($("<div>").addClass("ui divider"))
+		.append($("<h3>").text("Sus consumos").addClass("ui center aligned header"))
+		.append($("<div>").addClass("ui center aligned container calendar"))
+		.append($("<div>").addClass("ui segment container")
+		.append($("<div>").attr("id","myUptakes").addClass("ui middle aligned divided list")));
+
+	var d = new Date();
+	y = d.getFullYear();
+	m = d.getMonth();
+	ty = y;
+	tm = m;
+	printCalendar(function(){printMonthUptakes(doc.id)});
+	printMonthUptakes(doc.id);
+
 }
