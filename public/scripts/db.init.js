@@ -33,10 +33,8 @@ var y,m,ty,tm;
 
 /* TODO LIST
 
-- Descontar stock en consumo
 - Agregar refresco al consumo de combinados
 - Agregar consumo del usuario y deudas a su ficha
-- Agregar gestión de stock en edición bebidas
 
 */
 
@@ -61,9 +59,10 @@ function drinxIndex(){
 			}
 
 			$("<div>").addClass("column")
-				.append($("<div>").addClass("ui card").attr("data-id",doc.id).attr("data-price",doc.data().price).click(function(){
+				.append($("<div>").addClass("ui card").attr("data-id",doc.id).attr("data-price",doc.data().price).attr("data-stock",doc.data().stock).click(function(){
 					$('.ui.modal .header').text($(this).find(".header").text());
 					$('.ui.modal').attr("data-id",$(this).attr("data-id"));
+					$('.ui.modal').attr("data-stock",$(this).attr("data-stock"));
 					$('.ui.modal').attr("data-price",$(this).attr("data-price"));
 					$('.ui.modal').modal({
 						onApprove: function(){
@@ -90,6 +89,15 @@ function drinxIndex(){
 							.catch(function(error) {
 								console.error("Error adding document: ", error);
 							});
+
+							db.collection("beverages").doc($('.ui.modal').attr("data-id")).update({
+								stock: parseInt($('.ui.modal').attr("data-stock")) - intQuantity
+							}).then(function(docRef) {
+								$('div[data-id="' + $('.ui.modal').attr("data-id") + '"]').attr("data-stock",parseInt($('.ui.modal').attr("data-stock")) - intQuantity);
+								refreshSoldOut();
+							}).catch(function(error) {
+								console.error("Error adding document: ", error);
+							});
 						},
 						onHidden: function(){
 							$("#quantity").val("1");
@@ -104,9 +112,20 @@ function drinxIndex(){
 						.append($("<div>").addClass("ui right floated tag label").text(formatCurrency(doc.data().price)))))
 				.appendTo(".cat" + doc.data().category);
 		});
+		refreshSoldOut();
 	});
 
 	return false;
+}
+
+function refreshSoldOut(){
+	$(".card").each(function(){
+		if(parseInt($(this).attr("data-stock")) <= 0){
+			$(this).children(".image").prepend(
+				$("<div>").addClass("ui red right ribbon label").text("Agotado").prepend(
+					$("<i>").addClass("exclamation triangle icon")));
+		}
+	});
 }
 
 function uptakesIndex(){
@@ -259,6 +278,7 @@ function modalPlus(){
 		var q = parseInt($("#quantity").val());
 	}
 	q++;
+	if(q > parseInt($('.ui.modal').attr("data-stock"))) return false;
 	$("#quantity").val(q);
 }
 
@@ -571,8 +591,14 @@ function manageBeverages(){
 
 		db.collection("beverages").get().then(function(querySnapshot) {
 			querySnapshot.forEach(function(doc) {
+				var color = "orange";
+				if(parseInt(doc.data().stock) > 10)
+					color = "green";
+				else if(parseInt(doc.data().stock) < 4)
+					color = "red";
 
 				$("<div>").addClass("item")
+					.append($("<div>").addClass("ui " + color + " circular label").text(doc.data().stock))
 					.append($("<img>").addClass("ui avatar image").attr("src", images_url + images_d[doc.data().image].file))
 					.append($("<div>").addClass("content")
 						.append($("<div>").addClass("header").text(doc.data().name)))
