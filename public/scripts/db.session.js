@@ -54,7 +54,6 @@ $(document).ready(function(){
 });
 
 function signin(){
-	console.log("SESSION: sign in");
 	var provider = new firebase.auth.GoogleAuthProvider();
 	firebase.auth().useDeviceLanguage();
 	firebase.auth()
@@ -69,6 +68,7 @@ function signin(){
 			var errorMessage = error.message;
 			var email = error.email;
 			var credential = error.credential;
+			console.error("Error signing in: ", error);
 	});
 }
 
@@ -102,13 +102,12 @@ function checkUser(){
     		}
     	})
     .catch(function(error) {
-        console.log("Error getting user: ", error);
+        console.error("Error getting user: ", error);
 		showSessionError("No puedes iniciar sesión con " + user.email);
     });
 }
 
 function identifyUser(user,userid){
-	console.log(user.photoURL);
 	fetch(user.photoURL)
 	  .then(res => res.blob())
 	  .then(blob => {
@@ -125,9 +124,7 @@ function identifyUser(user,userid){
 		var storage = firebase.storage().ref();
 		var avatarRef = storage.child('avatars/' + userid + '.jpg');
 		var metadata = {cacheControl: 'public,max-age=300'};
-		avatarRef.put(blob,metadata).then((snapshot) => {
-  			console.log('avatar updated');
-		});
+		avatarRef.put(blob,metadata).then((snapshot) => {});
 
     	var db = firebase.firestore();
 		db.collection("users").doc(userid).update({
@@ -137,6 +134,15 @@ function identifyUser(user,userid){
 		.then(function() {})
 		.catch(function(error) {
 	    	console.error("Error updating user: ", error);
+		});
+	}).catch(function(){
+		console.log("Error fetching picture");
+		$("#identity label").text(user.displayName);
+		$("#sessionlayout").fadeIn();
+		$("#loginlayout").fadeOut(function(){
+			$("#topmenu").fadeIn();
+			drinxIndex();
+			if(a) $("#amenu").fadeIn();
 		});
 	});
 }

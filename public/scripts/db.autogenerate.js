@@ -12,7 +12,9 @@
     db.collection("beverages").doc("n21axPunQQcsbKwkD43h").set({
       name: "Cerveza",
       price: 1 ,
-      image: 2
+      image: 2,
+      category: 0,
+      stock: 10
     })
     .then(function(docRef) {
       console.log("Beverage written with ID: n21axPunQQcsbKwkD43h");
@@ -24,7 +26,9 @@
     db.collection("beverages").doc("ycSaPimReVqMd9WHwJmp").set({
       name: "Refresco",
       price: 0.75 ,
-      image: 1
+      image: 1,
+      category: 0,
+      stock: 10
     })
     .then(function(docRef) {
       console.log("Beverage written with ID: ycSaPimReVqMd9WHwJmp");
@@ -36,7 +40,9 @@
     db.collection("beverages").doc("XqBiH7q9PdK31pkScMjs").set({
       name: "Café",
       price: 0.5 ,
-      image: 3
+      image: 3,
+      category: 0,
+      stock: 10
     })
     .then(function(docRef) {
       console.log("Beverage written with ID: XqBiH7q9PdK31pkScMjs");
@@ -48,7 +54,9 @@
     db.collection("beverages").doc("9854714GvVSCWaoCKI4l").set({
       name: "Combinado",
       price: 2 ,
-      image: 4
+      image: 4,
+      category: 0,
+      stock: 10
     })
     .then(function(docRef) {
       console.log("Beverage written with ID: 9854714GvVSCWaoCKI4l");

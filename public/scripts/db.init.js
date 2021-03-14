@@ -34,7 +34,8 @@ var y,m,ty,tm;
 /* TODO LIST
 
 - Agregar refresco al consumo de combinados
-- Agregar consumo del usuario y deudas a su ficha
+- Añadir feedback tras consumo y revisar problema de scroll
+- Enlace a cabify si te tomas más de 3 licores en el mismo dia
 
 */
 
@@ -57,7 +58,6 @@ function drinxIndex(){
 					.append($("<div>").addClass("ui two column cards grid container cat" + doc.data().category));
 				oldCat = doc.data().category;
 			}
-
 			$("<div>").addClass("column")
 				.append($("<div>").addClass("ui card").attr("data-id",doc.id).attr("data-price",doc.data().price).attr("data-stock",doc.data().stock).click(function(){
 					$('.ui.modal .header').text($(this).find(".header").text());
@@ -100,6 +100,9 @@ function drinxIndex(){
 							});
 						},
 						onHidden: function(){
+							$(".drinxquantity").text($("#quantity").val());
+							$(".drinxdescription").text($(this).find(".header").text());
+							$("#uptakeSucceded").slideDown().delay(3000).slideUp();
 							$("#quantity").val("1");
 							$("body").removeClass("dimmable");
 						}
