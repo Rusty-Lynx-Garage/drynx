@@ -24,7 +24,8 @@ const images_d = [
 	{name:"Vodka", file:"moskovskaya.png"},
 	{name:"Hierbas", file:"orujo-hierbas.png"},
 	{name:"Crema", file:"crema-orujo.jpg"},
-	{name:"Ginebra",file:"tanqueray.png"}
+	{name:"Ginebra",file:"tanqueray.png"},
+	{name:"Licor café",file:"licor-cafe.jpg"}
 	];
 const categories = ["Cafés","Cervezas","Refrescos","Licores"];
 const cat_refrescos = 2;
@@ -34,7 +35,6 @@ var y,m,ty,tm;
 /* TODO LIST
 
 - Agregar refresco al consumo de combinados
-- Añadir feedback tras consumo y revisar problema de scroll
 - Enlace a cabify si te tomas más de 3 licores en el mismo dia
 
 */
