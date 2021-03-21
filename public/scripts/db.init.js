@@ -95,6 +95,7 @@ function drinxIndex(){
 							}).then(function(docRef) {
 								$('div[data-id="' + $('.ui.modal').attr("data-id") + '"]').attr("data-stock",parseInt($('.ui.modal').attr("data-stock")) - intQuantity);
 								refreshSoldOut();
+								$("#uptakeSucceded").slideDown().delay(3000).slideUp();
 							}).catch(function(error) {
 								console.error("Error adding document: ", error);
 							});
@@ -102,7 +103,6 @@ function drinxIndex(){
 						onHidden: function(){
 							$(".drinxquantity").text($("#quantity").val());
 							$(".drinxdescription").text($(this).find(".header").text());
-							$("#uptakeSucceded").slideDown().delay(3000).slideUp();
 							$("#quantity").val("1");
 							$("body").removeClass("dimmable");
 						}
