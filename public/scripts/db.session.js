@@ -1,6 +1,7 @@
 var a = false;
 var n = false;
 var people = [];
+var members = [];
 
 firebase.auth().onAuthStateChanged(function(user) {
 	if (user) {
@@ -19,6 +20,7 @@ $(document).ready(function(){
 		showLogin();
 	}
 
+	/* DA ERROR EN IOS, antes de activar buscar forma de condicionar esto
 	const messaging = firebase.messaging();
 	messaging.getToken({vapidKey: "BD87ZybGpbvjwqT1JAeLjXEET3uHE8SIigVNHohqLYJfAE3B3Eel96bXPAVKP4BDifWVumCacmIj8zhmbtKxYTg"}).then((currentToken) => {
 		if (currentToken) {
@@ -28,12 +30,14 @@ $(document).ready(function(){
 	}).catch((err) => {
 		console.log('An error occurred while retrieving token. ', err);
 	});
+	*/
 
 	var db = firebase.firestore();
 	var storage = firebase.storage().ref();
 	db.collection("users").get().then(function(querySnapshot) {
 		querySnapshot.forEach(function(u) {
 			people[u.id] = {avatar: "/images/user.png", name: u.data().name?u.data().name:u.id};
+			members.push(u.id);
 			storage.child('avatars/' + u.id + '.jpg').getDownloadURL().then((url) => {
 				var xhr = new XMLHttpRequest();
 				xhr.responseType = 'blob';

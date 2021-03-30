@@ -209,9 +209,15 @@ function globalsIndex(){
 
 	        	for(var d in drinkers) {
 	        		var id = d.replace(/\./g, "");
-					$("<div>").addClass("item")
-						.append($("<img>").addClass("ui avatar image " + id).attr("src",images_url + user_default))
-						.append($("<div>").addClass("content")
+					$("<div>").addClass("item").attr("data-id",id).click(function(){
+						toggleUptakes($(this).attr("data-id"));
+					})
+						.append($("<div>").addClass("ui disabled move down reveal left floated")
+							.append($("<div>").addClass("visible content")
+								.append($("<img>").addClass("ui avatar image " + id).attr("src",images_url + user_default)))
+							.append($("<div>").addClass("hidden content")
+								.append($("<img>").addClass("ui avatar image").attr("src",images_url + user_default))))
+						.append($("<div>").addClass("content").css("padding","0 0 0 2.5em")
 							.append($("<div>").addClass("header " + id))
 							.append($("<p>").text(drinkers[d].uptakes + (drinkers[d].uptakes > 1 ? " consumiciones" : " consumición"))))
 						.prepend($("<div>").addClass("right floated content").text(formatCurrency(drinkers[d].debt)))
@@ -274,6 +280,21 @@ function globalsIndex(){
     });
 
 	return false;
+}
+
+function toggleUptakes(id){
+	if($("div[data-id=" + id + "] .reveal").hasClass("active")){
+		$("#myUptakes").remove();
+	}else{
+		$("div.active").removeClass("active");
+		$("#myUptakes").remove();
+		$("div[data-id=" + id + "]").append($("<div>").attr("id","myUptakes").addClass("list"));
+		var d = new Date();
+		y = d.getFullYear();
+		m = d.getMonth();
+		printMonthUptakes(id);
+	}
+	$("div[data-id=" + id + "] .reveal").toggleClass("active");
 }
 
 function modalPlus(){
